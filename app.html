@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playlist Bridge</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header>
+    <h1>Playlist Bridge</h1>
+    <p class="sub">Spotify ⇄ YouTube Music ⇄ YouTube 播放清單互轉</p>
+  </header>
+
+  <main>
+    <section class="card" id="step-source">
+      <h2>1. 來源與目標</h2>
+      <label class="field">
+        <span>來源播放清單網址</span>
+        <input id="src-url" type="url" placeholder="https://open.spotify.com/playlist/… 或 https://music.youtube.com/playlist?list=…">
+      </label>
+      <div class="row">
+        <label class="field">
+          <span>轉到</span>
+          <select id="target">
+            <option value="ytmusic">YouTube Music</option>
+            <option value="youtube">YouTube</option>
+            <option value="spotify">Spotify</option>
+          </select>
+        </label>
+        <label class="field grow">
+          <span>新清單名稱</span>
+          <input id="pl-name" type="text" placeholder="讀取後自動帶入">
+        </label>
+      </div>
+      <div class="actions">
+        <button id="btn-load" class="primary">讀取來源清單</button>
+        <span id="src-info" class="muted"></span>
+      </div>
+    </section>
+
+    <section class="card" id="step-match" hidden>
+      <div class="bar">
+        <h2>2. 配對</h2>
+        <div class="filters" role="tablist">
+          <button data-filter="all" class="chip active">全部 <b id="c-all">0</b></button>
+          <button data-filter="uncertain" class="chip">需確認 <b id="c-uncertain">0</b></button>
+          <button data-filter="notfound" class="chip">找不到 <b id="c-notfound">0</b></button>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btn-match" class="primary">開始配對</button>
+        <button id="btn-stop" hidden>停止</button>
+        <progress id="progress" value="0" max="1" hidden></progress>
+      </div>
+      <p class="hint">綠色＝自動選定；黃色＝已預選最接近的結果，請確認；紅色＝找不到，可從下拉選單挑或貼連結。</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>原始歌曲</th><th>配對結果</th><th>狀態</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="step-create" hidden>
+      <h2>3. 建立播放清單</h2>
+      <div class="actions">
+        <button id="btn-create" class="primary">建立播放清單</button>
+        <button id="btn-csv">下載報告 CSV</button>
+        <button id="btn-copy-missing">複製未加入的歌</button>
+      </div>
+      <p id="create-result"></p>
+    </section>
+
+    <p id="status" class="status" role="status"></p>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
