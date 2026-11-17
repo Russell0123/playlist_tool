@@ -2,7 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { scoreCandidate, rank, classify, coreTitle, cleanVideoTrack, buildQuery } from '../lib/match.js';
 import { parsePlaylistUrl, parseTrackUrl } from '../lib/platforms.js';
-import { parseListItem, parsePlaylistTitle } from '../lib/ytmusic.js';
+import { parseListItem, parsePlaylistTitle, parsePlaylistTotal } from '../lib/ytmusic.js';
+import { parseEmbedHtml } from '../lib/spotify.js';
+import { redact } from '../lib/log.js';
 
 const src = { title: '告白氣球', artists: ['周杰倫'], durationMs: 215000 };
 
@@ -104,6 +106,31 @@ test('parseListItem: playlist row with fixed duration column', () => {
   assert.equal(t.id, 'zzzzzzzzzzz');
   assert.deepEqual(t.artists, ['Artist B']);
   assert.equal(t.durationMs, 241000);
+});
+
+test('parseEmbedHtml (Spotify 嵌入頁)', () => {
+  const next = { props: { pageProps: { state: { data: { entity: { name: '海祭金曲派對', trackList: [
+    { uri: 'spotify:track:aaa', title: '浪人的眼淚', subtitle: '張震嶽', duration: 245000 },
+    { uri: 'spotify:track:bbb', title: '591', subtitle: '鄭宜農, 某人', duration: 338000 },
+  ] } } } } } };
+  const html = `<html><script id="__NEXT_DATA__" type="application/json">${JSON.stringify(next)}</script></html>`;
+  const r = parseEmbedHtml(html);
+  assert.equal(r.name, '海祭金曲派對');
+  assert.equal(r.tracks.length, 2);
+  assert.deepEqual(r.tracks[1].artists, ['鄭宜農', '某人']);
+  assert.equal(r.tracks[0].url, 'https://open.spotify.com/track/aaa');
+  assert.equal(parseEmbedHtml('<html></html>'), null);
+});
+
+test('parsePlaylistTotal', () => {
+  assert.equal(parsePlaylistTotal({ musicResponsiveHeaderRenderer: { secondSubtitle: { runs: [{ text: '1,234 首歌曲' }] } } }), 1234);
+  assert.equal(parsePlaylistTotal({ musicResponsiveHeaderRenderer: { secondSubtitle: { runs: [{ text: '27 songs' }] } } }), 27);
+  assert.equal(parsePlaylistTotal({}), undefined);
+});
+
+test('redact hides credentials', () => {
+  const s = redact('Authorization: Bearer abc.DEF-123 and SAPISIDHASH 123_abcdef {"accessToken":"xyz"}');
+  assert.ok(!s.includes('abc.DEF') && !s.includes('abcdef') && !s.includes('xyz'), s);
 });
 
 test('parsePlaylistTitle', () => {

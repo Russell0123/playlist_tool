@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Playlist Bridge",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "在 Spotify、YouTube Music、YouTube 之間互轉播放清單（個人使用）",
   "action": {
     "default_title": "Playlist Bridge：轉換播放清單"

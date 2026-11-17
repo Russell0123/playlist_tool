@@ -26,7 +26,7 @@ Spotify ⇄ YouTube Music ⇄ YouTube 播放清單互轉的 Chrome 擴充功能�
 
 | 平台 | 怎麼連 |
 |---|---|
-| Spotify | 擷取 open.spotify.com 網頁播放器自己用的 token，再呼叫 `api.spotify.com` |
+| Spotify | 讀清單：嵌入播放器頁面（免登入、不吃限流），超過 100 首才改用 API。搜尋／建立：擷取 open.spotify.com 網頁播放器的 token 呼叫 `api.spotify.com`（需登入） |
 | YouTube Music | 在 music.youtube.com 分頁內呼叫網站自己的 `youtubei` 內部 API（帶你的登入 cookie） |
 | YouTube | 與 YouTube Music 共用帳號清單與影片 ID，沿用同一套程式，只換連結格式 |
 
@@ -52,13 +52,20 @@ lib/
   spotify.js       Spotify adapter
   ytmusic.js       YouTube Music adapter
   youtube.js       YouTube adapter（包 ytmusic）
-  util.js          共用工具
+  util.js          共用工具（逾時、分頁管理）
+  log.js           執行紀錄與憑證遮蔽
 tests/
   match.test.js    單元測試：npm test
   e2e.mjs          以模擬回應跑完整流程：node tests/e2e.mjs（需 Playwright）
 ```
 
 每個 adapter 實作相同介面：`prepare()`、`getPlaylist(id)`、`searchCandidates(track)`、`createPlaylist(name, ids, description)`。
+
+## 出問題時
+
+- 每個請求最多等 20 秒；被限流最多重試 3 次；連續 3 首失敗會自動停止
+- 畫面上的紅色區塊或頁尾都有「複製錯誤回報」，內容含錯誤細節與最近 80 筆執行紀錄（登入憑證會自動遮蔽）
+- 頁尾「執行紀錄」可即時看到每一個請求
 
 ## 已知限制
 
